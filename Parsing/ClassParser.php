@@ -31,25 +31,23 @@ class ClassParser
 		$contentType = $request->getAcceptableContentTypes()[0];
 
 		$formatter = $this->getFormmatter($contentType);
-		$array = $obj;
-		if(!is_array($array))
-			$array = $this->buildArray($obj);
+		$array = $this->buildArray($obj);
 		$parse = $formatter->serialize($array);
 
 		return array("type" => $formatter->getType(), "result" => $parse);
 	}
 
 	public function parseClass($class, $content) {
-		$class = new \ReflectionClass($class);
-
 		$request = Request::createFromGlobals();
 		$contentType = $request->getContentType();
 
 		$formatter = $this->getFormmatter($contentType);
-		$parse = $formatter->parse($content);
+		$result = $formatter->parse($content);
 
-		$result = $this->buildObject($parse, $class);
-
+		if(!empty($class)) {
+			$class = new \ReflectionClass($class);
+			$result = $this->buildObject($result, $class);
+		}
 		return $result;
 	}
 
@@ -71,20 +69,25 @@ class ClassParser
 
 	private function buildArray($obj) {
 		$result = array();
-		$reflectionObj = new \ReflectionObject($obj);
-		$reflectionProperties = $reflectionObj->getProperties();
-		foreach($reflectionProperties as $property)
-		{
-			$serializeAnnotation = $this->reader->getPropertyAnnotation($property, Serialize::class);
-			$name = $property->getName();
-			if($serializeAnnotation->getName() != null)
-				$name = $serializeAnnotation->getName();
-			if($serializeAnnotation->getClassName() != null) {
-				$result[$name] = $this->buildArray($property->getValue($obj));
+		if(is_array($obj)) {
+			foreach($obj as $key=>$value){
+				$result[$key] = $this->buildArray($value);
 			}
-			else
-			{
-				$result[$name] = $property->getValue($obj);
+		}
+		else {
+			$reflectionObj = new \ReflectionObject($obj);
+			$reflectionProperties = $reflectionObj->getProperties();
+			foreach ($reflectionProperties as $property) {
+				$serializeAnnotation = $this->reader->getPropertyAnnotation($property, Serialize::class);
+				if($serializeAnnotation == null) continue;
+				$name = $property->getName();
+				if ($serializeAnnotation->getName() != null)
+					$name = $serializeAnnotation->getName();
+				if ($serializeAnnotation->getClassName() != null) {
+					$result[$name] = $this->buildArray($property->getValue($obj));
+				} else {
+					$result[$name] = $property->getValue($obj);
+				}
 			}
 		}
 		return $result;
@@ -107,7 +110,18 @@ class ClassParser
 				}
 				if ($serializeAnnotation->getClassName() != null) {
 					$className = $serializeAnnotation->getClassName();
-					$property->setValue($result, $this->buildObject($parse[$name], new ReflectionClass($className)));
+					$val = null;
+					if(strpos($className, []) !== false){
+						$className = substr($className, 0, -2);
+						$array = $parse[$name];
+						$val = array();
+						foreach($array as $value) {
+							$val[] = $this->buildObject($value, new ReflectionClass($className))
+						}
+					} else {
+						$val = $this->buildObject($parse[$name], new ReflectionClass($className));
+					}
+					$property->setValue($result, $val);
 				} else {
 					$property->setValue($result, $parse[$name]);
 				}
