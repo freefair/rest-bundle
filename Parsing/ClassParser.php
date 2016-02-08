@@ -116,7 +116,7 @@ class ClassParser
 						$array = $parse[$name];
 						$val = array();
 						foreach($array as $value) {
-							$val[] = $this->buildObject($value, new ReflectionClass($className))
+							$val[] = $this->buildObject($value, new ReflectionClass($className));
 						}
 					} else {
 						$val = $this->buildObject($parse[$name], new ReflectionClass($className));
