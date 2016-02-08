@@ -20,6 +20,22 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('rest');
 
+        $rootNode
+            ->children()
+                ->booleanNode("debug")->defaultFalse()->end()
+                ->arrayNode("formatters")
+                    ->fixXmlConfig("formatter")
+                    ->prototype("array")
+                        ->children()
+                            ->scalarNode("id")->end()
+                            ->scalarNode("type")->end()
+                            ->booleanNode("default")->defaultFalse()->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.

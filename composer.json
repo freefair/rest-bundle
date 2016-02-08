@@ -1,0 +1,35 @@
+{
+    "name": "freefair/rest-bundle",
+    "type": "symfony-bundle",
+    "description": "This Bundle proviedes functionality for rest services in symfony3",
+    "keywords": ["rest", "controller", "http", "get", "post", "put", "delete", "json"],
+    "homepage": "http://freefair.io",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dennis Fricke",
+            "email": "dennis.fricke@freefair.io"
+        },
+        {
+            "name": "Lars Grefer",
+            "email": "lars.grefer@freefair.io"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.5.9",
+        "symfony/symfony": "3.0.*"
+    },
+
+    "require-dev": {
+    },
+
+    "suggest": {
+    },
+
+    "autoload":{
+        "psr-4":{
+            "freefair\\RestBundle\\": ""
+        }
+    }
+}

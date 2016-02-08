@@ -1,4 +1,14 @@
 services:
+    rest_internal_class_parser:
+        class: freefair\RestBundle\Parsing\ClassParser
+        arguments: ["@service_container"]
+    request_body:
+        class: freefair\RestBundle\Converters\RequestBodyConverter
+        arguments: ["@rest_internal_class_parser"]
+        tags:
+            - { name: request.param_converter, priority: -2, converter: request_body }
+    json_formatter:
+        class: freefair\RestBundle\Formatters\JsonFormatter
 #    rest.example:
 #        class: freefair\RestBundle\Example
 #        arguments: [@service_id, "plain_value", %parameter%]

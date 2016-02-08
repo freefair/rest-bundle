@@ -1,3 +1,0 @@
-rest_homepage:
-    path:     /
-    defaults: { _controller: RestBundle:Default:index }
