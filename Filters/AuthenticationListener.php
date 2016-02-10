@@ -44,9 +44,12 @@ class AuthenticationListener
 
 		if($authorize != null && $config["enabled"]) {
 			$authHeader = $event->getRequest()->headers->get("authorization", "null null");
-			$token = explode(" ", $authHeader)[1];
+			$explode = explode(" ", $authHeader);
+			$type = $explode[0];
+			$token = $explode[1];
 
-			if ($authHeader == null) $this->unauth();
+			if ($authHeader == "null null") $this->unauth();
+			if (strtolower($type) != "bearer") $this->unauth();
 
 			$type = $config["oauth_type"];
 			if($type == "own") {
@@ -62,7 +65,7 @@ class AuthenticationListener
 				$session->set("consumer", $authToken->getConsumer());
 				$event->getRequest()->setSession($session);
 			}
-			else if ($type == "static_tokens"){
+			else if ($type == "static"){
 				$tokens = $config["oauth"]["static_tokens"];
 				if(!in_array($token, $tokens)) $this->unauth();
 			}
