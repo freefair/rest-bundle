@@ -73,6 +73,16 @@ class OAuthService
 		return $this->getDoctrine()->getManager($auth_code_entity)->getRepository($auth_code_entity)->findBy(array("authCode" => $code))[0];
 	}
 
+	/**
+	 * @param $token
+	 * @return AuthTokenInterface
+	 */
+	public function getAuthToken($token)
+	{
+		$auth_token_entity = $this->container->getParameter("rest.config")["authentication"]["oauth"]["auth_token_entity"];
+		return $this->getDoctrine()->getManager($auth_token_entity)->getRepository($auth_token_entity)->findOneBy(array("authToken" => $token));
+	}
+
 	private function base64url_encode($data) {
 		return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
 	}
