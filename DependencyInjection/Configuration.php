@@ -39,7 +39,6 @@ class Configuration implements ConfigurationInterface
                         ->enumNode("oauth_type")->values(array("static", "own"))->defaultValue("own")->end()
                         ->arrayNode("oauth")
                             ->children()
-                                ->scalarNode("service")->defaultNull()->end()
                                 ->integerNode("code_lifetime")->defaultValue(600)->end() // one month
                                 ->integerNode("token_lifetime")->defaultValue(2592000)->end() // one month
                                 ->scalarNode("grant_url")->defaultValue("/oauth/grant")->end()

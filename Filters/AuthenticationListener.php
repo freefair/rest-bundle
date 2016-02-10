@@ -40,22 +40,32 @@ class AuthenticationListener
 		if($methodAuthorize != null)
 			$authorize = $methodAuthorize;
 
-		if($authorize != null) {
-			/** @var OAuthService $oauthService */
-			$oauthService = $this->container->get("rest.oauth_service");
+		$config = $this->container->getParameter("rest.config")["authentication"];
 
-			$authHeader = $event->getRequest()->headers->get("authorization", null);
-			if($authHeader == null) $this->unauth();
+		if($authorize != null && $config["enabled"]) {
+			$authHeader = $event->getRequest()->headers->get("authorization", "null null");
+			$token = explode(" ", $authHeader)[1];
 
-			$token = explode(" ", $authHeader)[0];
-			$authToken = $oauthService->getAuthToken($token);
+			if ($authHeader == null) $this->unauth();
 
-			if($authToken == null) $this->unauth();
+			$type = $config["oauth_type"];
+			if($type == "own") {
+				/** @var OAuthService $oauthService */
+				$oauthService = $this->container->get("rest.oauth_service");
 
-			$session = new Session(new MockArraySessionStorage());
-			$session->set("token", $authToken->getAuthToken());
-			$session->set("consumer", $authToken->getConsumer());
-			$event->getRequest()->setSession($session);
+				$authToken = $oauthService->getAuthToken($token);
+
+				if ($authToken == null) $this->unauth();
+
+				$session = new Session(new MockArraySessionStorage());
+				$session->set("token", $authToken->getAuthToken());
+				$session->set("consumer", $authToken->getConsumer());
+				$event->getRequest()->setSession($session);
+			}
+			else if ($type == "static_tokens"){
+				$tokens = $config["oauth"]["static_tokens"];
+				if(!in_array($token, $tokens)) $this->unauth();
+			}
 		}
 	}
 

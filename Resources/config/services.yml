@@ -1,6 +1,7 @@
 services:
     rest.authentication_listener:
         class: freefair\RestBundle\Filters\AuthenticationListener
+        arguments: ["@service_container"]
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
     rest.internal_class_parser:
