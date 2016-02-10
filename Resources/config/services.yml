@@ -1,14 +1,22 @@
 services:
-    rest_internal_class_parser:
+    rest.authentication_listener:
+        class: freefair\RestBundle\Filters\AuthenticationListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+    rest.internal_class_parser:
         class: freefair\RestBundle\Parsing\ClassParser
         arguments: ["@service_container"]
     rest_converter:
         class: freefair\RestBundle\Converters\RequestBodyConverter
-        arguments: ["@rest_internal_class_parser"]
+        arguments: ["@rest.internal_class_parser"]
         tags:
             - { name: request.param_converter, priority: -2, converter: rest_converter }
-    json_formatter:
+    rest.oauth_service:
+        class: freefair\RestBundle\Services\OAuthService
+    rest.json_formatter:
         class: freefair\RestBundle\Formatters\JsonFormatter
+    rest.form_formatter:
+        class: freefair\RestBundle\Formatters\FormDataFormatter
 #    rest.example:
 #        class: freefair\RestBundle\Example
 #        arguments: [@service_id, "plain_value", %parameter%]
