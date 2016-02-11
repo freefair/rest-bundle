@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ClassParser
 {
+	private static $specialTypes = array("DateTime");
+
 	/**
 	 * @var ContainerInterface
 	 */
@@ -83,8 +85,12 @@ class ClassParser
 				$name = $property->getName();
 				if ($serializeAnnotation->getName() != null)
 					$name = $serializeAnnotation->getName();
-				if ($serializeAnnotation->getClassName() != null) {
-					$result[$name] = $this->buildArray($property->getValue($obj));
+				$className = $serializeAnnotation->getClassName();
+				if ($className != null) {
+					if(in_array($className, self::$specialTypes))
+						$result[$name] = $this->buildArrayFromSpecialType($property->getValue($obj), $className);
+					else
+						$result[$name] = $this->buildArray($property->getValue($obj));
 				} else {
 					$result[$name] = $property->getValue($obj);
 				}
@@ -111,15 +117,21 @@ class ClassParser
 				if ($serializeAnnotation->getClassName() != null) {
 					$className = $serializeAnnotation->getClassName();
 					$val = null;
-					if(strpos($className, []) !== false){
+					if(strpos($className, "[]") !== false){
 						$className = substr($className, 0, -2);
 						$array = $parse[$name];
 						$val = array();
 						foreach($array as $value) {
-							$val[] = $this->buildObject($value, new ReflectionClass($className));
+							if(in_array($className, self::$specialTypes))
+								$val[] = $this->buildSpecialObject($value, $className);
+							else
+								$val[] = $this->buildObject($value, new ReflectionClass($className));
 						}
 					} else {
-						$val = $this->buildObject($parse[$name], new ReflectionClass($className));
+						if(in_array($className, self::$specialTypes))
+							$val = $this->buildSpecialObject($parse[$name], $className);
+						else
+							$val = $this->buildObject($parse[$name], new ReflectionClass($className));
 					}
 					$property->setValue($result, $val);
 				} else {
@@ -128,5 +140,24 @@ class ClassParser
 			}
 		}
 		return $result;
+	}
+
+	private function buildArrayFromSpecialType($getValue, $className)
+	{
+		if($className == "DateTime") {
+			/** @var \DateTime $dt */
+			$dt = $getValue;
+			return $dt;
+		}
+		return $getValue;
+	}
+
+	private function buildSpecialObject($value, $className)
+	{
+		if($className == "DateTime"){
+			$result = new \DateTime($value["date"], new \DateTimeZone($value["timezone"]));
+			return $result;
+		}
+		return $value;
 	}
 }
