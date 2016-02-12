@@ -2,6 +2,7 @@
 
 namespace freefair\RestBundle\Parsing;
 
+use Countable;
 use Doctrine\Common\Annotations\AnnotationReader;
 use freefair\RestBundle\Annotations\Serialize;
 use ReflectionClass;
@@ -28,12 +29,14 @@ class ClassParser
 		$this->reader = new AnnotationReader();
 	}
 
-	public function serializeObject($obj) {
+	public function serializeObject($obj, $skipArrayBuilding = false) {
 		$request = Request::createFromGlobals();
 		$contentType = $request->getAcceptableContentTypes()[0];
 
 		$formatter = $this->getFormmatter($contentType);
-		$array = $this->buildArray($obj);
+		$array = $obj;
+		if(!$skipArrayBuilding)
+			$array = $this->buildArray($obj);
 		$parse = $formatter->serialize($array);
 
 		return array("type" => $formatter->getType(), "result" => $parse);
@@ -71,7 +74,7 @@ class ClassParser
 
 	private function buildArray($obj) {
 		$result = array();
-		if(is_array($obj)) {
+		if(is_array($obj) || $obj instanceof Countable) {
 			foreach($obj as $key=>$value){
 				$result[$key] = $this->buildArray($value);
 			}

@@ -4,6 +4,12 @@ services:
         arguments: ["@service_container"]
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+    rest.response_listener:
+        class: freefair\RestBundle\Filters\ResponseListener
+        arguments: ["@service_container"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+            - { name: kernel.event_listener, event: kernel.exception, method: onException }
     rest.internal_class_parser:
         class: freefair\RestBundle\Parsing\ClassParser
         arguments: ["@service_container"]
