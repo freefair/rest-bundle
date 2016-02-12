@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ClassParser
 {
-	private static $specialTypes = array("DateTime");
+	private static $specialTypes = array("DateTime", "double");
 
 	/**
 	 * @var ContainerInterface
@@ -160,6 +160,9 @@ class ClassParser
 		if($className == "DateTime"){
 			$result = new \DateTime($value["date"], new \DateTimeZone($value["timezone"]));
 			return $result;
+		}
+		if($className == "double"){
+			return doubleval($value);
 		}
 		return $value;
 	}
