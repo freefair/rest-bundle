@@ -23,6 +23,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->booleanNode("debug")->defaultFalse()->end()
+                ->scalarNode("date_format")->defaultValue("php")->end()
                 ->arrayNode("formatters")
                     ->fixXmlConfig("formatter")
                     ->prototype("array")

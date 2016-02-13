@@ -150,7 +150,11 @@ class ClassParser
 		if($className == "DateTime") {
 			/** @var \DateTime $dt */
 			$dt = $getValue;
-			return $dt;
+			$date_format = $this->container->getParameter("rest.config")["date_format"];
+			if($date_format == "php")
+				return $dt;
+			else
+				return $dt->format($date_format);
 		}
 		return $getValue;
 	}
@@ -158,7 +162,11 @@ class ClassParser
 	private function buildSpecialObject($value, $className)
 	{
 		if($className == "DateTime"){
-			$result = new \DateTime($value["date"], new \DateTimeZone($value["timezone"]));
+			$date_format = $this->container->getParameter("rest.config")["date_format"];
+			if($date_format == "php")
+				$result = new \DateTime($value["date"], new \DateTimeZone($value["timezone"]));
+			else
+				$result = \DateTime::createFromFormat($date_format, $value);
 			return $result;
 		}
 		if($className == "double"){
