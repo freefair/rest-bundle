@@ -27,12 +27,5 @@ class RestExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
-
-        if($config["authentication"]["enabled"] && $config["authentication"]["oauth_type"] != "static") {
-            $definitions = new Definition();
-            $definitions->addTag("routing.loader");
-            $definitions->setClass(RoutingLoader::class);
-            $container->addDefinitions(array("rest.route_loader" => $definitions));
-        }
     }
 }

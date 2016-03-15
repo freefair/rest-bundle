@@ -10,14 +10,23 @@ namespace freefair\RestBundle\DependencyInjection;
 
 
 use Symfony\Component\Config\Loader\Loader;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 class RoutingLoader extends Loader
 {
-	use ContainerAwareTrait;
+	/**
+	 * @var Container
+	 */
+	private $container;
 	private $loaded = false;
+
+	public function __construct($container)
+	{
+		$this->container = $container;
+	}
 
 	/**
 	 * Loads a resource.
@@ -35,6 +44,7 @@ class RoutingLoader extends Loader
 		}
 
 		$parameter = $this->container->getParameter("rest.config");
+		if(!$parameter["authentication"]["enabled"] || $parameter["authentication"]["oauth_type"] != "own") return new RouteCollection();
 
 		$grant_url = $parameter["authentication"]["oauth"]["grant_url"];
 		$token_url = $parameter["authentication"]["oauth"]["token_url"];
@@ -65,7 +75,7 @@ class RoutingLoader extends Loader
 	 */
 	public function supports($resource, $type = null)
 	{
-		return 'advanced_extra' === $type;
+		return 'rest' === $type;
 	}
 
 	/**
@@ -83,7 +93,7 @@ class RoutingLoader extends Loader
 		$route = new Route($url, $defaults, $requirements);
 
 		// add the new route to the route collection
-		$routeName = 'extraRoute';
+		$routeName = 'rest_route_' . str_replace(':', '_', $controller);
 		$routes->add($routeName, $route);
 	}
 }
