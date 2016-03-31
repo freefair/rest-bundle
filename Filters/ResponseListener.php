@@ -24,8 +24,11 @@ class ResponseListener
 
 	public function onKernelResponse(FilterResponseEvent $event) {
 		$arr = $event->getRequest()->headers->get("accept");
-		if(is_array($arr) && (in_array("text/html", $arr) || in_array("*/*", $arr))) return;
+		if(is_array($arr) && (in_array("text/html", $arr) || in_array("*/*", $arr)) || !is_array($arr) && $arr == "text/html") return;
+		if(!is_array($arr))
+			$arr = array($arr);
 		$response = $event->getResponse();
+		if(in_array($response->headers->get("content-type"), $arr)) return;
 		$error = $response->isServerError() || $event->getResponse()->isClientError();
 		if($error) {
 			$result = array();

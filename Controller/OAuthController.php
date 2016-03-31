@@ -30,8 +30,6 @@ class OAuthController extends RestController
 	 * @ParamConverter(name="model", converter="rest_converter")
 	 */
 	public function tokenAction(TokenModel $model) {
-		$accessToken = "";
-		$validTill = "";
 
 		if($model->grant_type == "authorization_code") {
 			$validateClient = $this->getService()->validateClient($model->client_id, $model->client_secret, $model->redirect_uri);
