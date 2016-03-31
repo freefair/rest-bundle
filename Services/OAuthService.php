@@ -10,7 +10,10 @@ use Symfony\Component\Validator\Constraints\DateTime;
 
 class OAuthService
 {
-	use ContainerAwareTrait;
+	public function __construct($container)
+	{
+		$this->container = $container;
+	}
 
 	public function createAuthCode(array $scopes, ConsumerInterface $consumer, $redirect_url)
 	{
@@ -29,7 +32,7 @@ class OAuthService
 		$dt = new \DateTime();
 		$entity->setValidTill($dt->getTimestamp() + $oauth["code_lifetime"]);
 
-		$manager = $this->getDoctrine()->getManager($auth_code_entity);
+		$manager = $this->getDoctrine()->getManager();
 		$manager->persist($entity);
 		$manager->flush();
 
@@ -51,8 +54,9 @@ class OAuthService
 		$dt = new \DateTime();
 		$entity->setValidTill($dt->getTimestamp() + $oauth["token_lifetime"]);
 
-		$manager = $this->getDoctrine()->getManager($auth_token_entity);
+		$manager = $this->getDoctrine()->getManager();
 		$manager->persist($entity);
+		$manager->remove($authCode);
 		$manager->flush();
 
 		return $entity;
@@ -60,17 +64,17 @@ class OAuthService
 
 	public function validateClient($client_id, $client_secret, $redirect_uri)
 	{
-		$consumer_entity = $this->container->getParameter("rest.config")["authentication"]["oauth"]["consumer_entity"];
+		$consumer_entity = $this->container->getParameter("rest.config")["authentication"]["oauth"]["persistence"]["consumer_entity"];
 		/** @var ConsumerInterface[] $by */
-		$by = $this->getDoctrine()->getManager($consumer_entity)->getRepository($consumer_entity)->findBy(array("client_id" => $client_id));
+		$by = $this->getDoctrine()->getManager()->getRepository($consumer_entity)->findBy(array("client_id" => $client_id));
 		if($by == null || count($by) != 1) return false;
 		return $by[0]->getClientSecret() == $client_secret && in_array($redirect_uri, $by[0]->getRedirectUri());
 	}
 
 	public function getAuthCode($code)
 	{
-		$auth_code_entity = $this->container->getParameter("rest.config")["authentication"]["oauth"]["auth_code_entity"];
-		return $this->getDoctrine()->getManager($auth_code_entity)->getRepository($auth_code_entity)->findBy(array("authCode" => $code))[0];
+		$auth_code_entity = $this->container->getParameter("rest.config")["authentication"]["oauth"]["persistence"]["auth_code_entity"];
+		return $this->getDoctrine()->getManager()->getRepository($auth_code_entity)->findBy(array("authCode" => $code))[0];
 	}
 
 	/**
@@ -79,8 +83,8 @@ class OAuthService
 	 */
 	public function getAuthToken($token)
 	{
-		$auth_token_entity = $this->container->getParameter("rest.config")["authentication"]["oauth"]["auth_token_entity"];
-		return $this->getDoctrine()->getManager($auth_token_entity)->getRepository($auth_token_entity)->findOneBy(array("authToken" => $token));
+		$auth_token_entity = $this->container->getParameter("rest.config")["authentication"]["oauth"]["persistence"]["auth_token_entity"];
+		return $this->getDoctrine()->getManager()->getRepository($auth_token_entity)->findOneBy(array("authToken" => $token));
 	}
 
 	private function base64url_encode($data) {
@@ -91,7 +95,7 @@ class OAuthService
 		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	    $randstring = '';
 	    for ($i = 0; $i < $length; $i++) {
-		    $randstring = $characters[rand(0, strlen($characters))];
+		    $randstring .= $characters[rand(0, strlen($characters)-1)];
 	    }
 	    return $randstring;
 	}

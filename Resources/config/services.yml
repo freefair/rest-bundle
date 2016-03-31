@@ -14,6 +14,7 @@ services:
             - { name: request.param_converter, priority: -2, converter: rest_converter }
     rest.oauth_service:
         class: freefair\RestBundle\Services\OAuthService
+        arguments: ["@service_container"]
     rest.json_formatter:
         class: freefair\RestBundle\Formatters\JsonFormatter
     rest.form_formatter:

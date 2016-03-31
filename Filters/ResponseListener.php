@@ -23,10 +23,12 @@ class ResponseListener
 	}
 
 	public function onKernelResponse(FilterResponseEvent $event) {
+		$debug = $this->container->getParameter('rest.config')['debug'];
+
 		$arr = $event->getRequest()->headers->get("accept");
-		if(is_array($arr) && (in_array("text/html", $arr) || in_array("*/*", $arr)) || !is_array($arr) && $arr == "text/html") return;
 		if(!is_array($arr))
 			$arr = array($arr);
+		if(is_array($arr) && (in_array("text/html", $arr) || in_array("*/*", $arr))) return;
 		$response = $event->getResponse();
 		if(in_array($response->headers->get("content-type"), $arr)) return;
 		$error = $response->isServerError() || $event->getResponse()->isClientError();
@@ -35,10 +37,12 @@ class ResponseListener
 			$result["status"] = $response->getStatusCode();
 			if(self::$exception != null) {
 				$result["message"] = self::$exception->getMessage();
-				$result["stacktrace"] = self::$exception->getTraceAsString();
+				if($debug)
+					$result["stacktrace"] = self::$exception->getTraceAsString();
 			} else {
 				$result["message"] = "unknown";
-				$result["stacktrace"] = "";
+				if($debug)
+					$result["stacktrace"] = "";
 			}
 			$classParser = $this->container->get("rest.internal_class_parser");
 			$content = $classParser->serializeObject($result, true);

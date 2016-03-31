@@ -36,8 +36,15 @@ class ClassParser
 
 		$formatter = $this->getFormmatter($contentType);
 		$array = $obj;
-		if (!$skipArrayBuilding)
-			$array = $this->buildArray($obj);
+		if($obj != null)
+		{
+			if (!$skipArrayBuilding)
+				$array = $this->buildArray($obj);
+		}
+		else
+		{
+			$array = null;
+		}
 		$parse = $formatter->serialize($array);
 
 		return array("type" => $formatter->getType(), "result" => $parse);

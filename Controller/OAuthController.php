@@ -22,15 +22,16 @@ class OAuthController extends RestController
 	/**
 	 * @return OAuthService
 	 */
-	private function getService() {
-		return $this->container->get('rest.oauth_service');
+	private function getService()
+	{
+		return $this->get('rest.oauth_service');
 	}
 
 	/**
 	 * @ParamConverter(name="model", converter="rest_converter")
 	 */
-	public function tokenAction(TokenModel $model) {
-
+	public function tokenAction(TokenModel $model)
+	{
 		if($model->grant_type == "authorization_code") {
 			$validateClient = $this->getService()->validateClient($model->client_id, $model->client_secret, $model->redirect_uri);
 			if(!$validateClient) return $this->invalidClient();
@@ -65,17 +66,18 @@ class OAuthController extends RestController
 
 		/** @var UserInterface $user */
 		$user = $this->getDoctrine()->getRepository($user_entity)->findOneBy(array("username" => $model->username));
+		if($user == null) return $this->invalidClient();
 
 		$encoder_service = $this->get('security.encoder_factory');
-		$encoder = $encoder_service->getEncoder($user);
+		$encoder = $encoder_service->getEncoder($user_entity);
 		$encoded_pass = $encoder->encodePassword($model->password, $user->getSalt());
 
 		if($encoded_pass != $user->getPassword()) return $this->invalidClient();
 
 		/** @var ConsumerInterface $client */
-		$client =$this->getDoctrine()->getRepository($client_entity)->findBy(array('client_id' => $model->client_id));
+		$client =$this->getDoctrine()->getRepository($client_entity)->findOneBy(array('client_id' => $model->client_id));
 
-		$authCodeInterface = $this->getService()->createAuthCode($model->scope, $client, $model->redirect_uri);
+		$authCodeInterface = $this->getService()->createAuthCode(explode(" ", $model->scope), $client, $model->redirect_uri);
 		$authTokenInterface = $this->getService()->createAuthTokenFromCode($authCodeInterface);
 
 		return $this->createAccessTokenResponse($authTokenInterface->getAuthToken(), $authTokenInterface->getValidTill());
