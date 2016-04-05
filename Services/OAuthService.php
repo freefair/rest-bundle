@@ -6,6 +6,7 @@ use freefair\RestBundle\Entity\AuthCodeInterface;
 use freefair\RestBundle\Entity\AuthTokenInterface;
 use freefair\RestBundle\Entity\ConsumerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 class OAuthService
@@ -15,7 +16,7 @@ class OAuthService
 		$this->container = $container;
 	}
 
-	public function createAuthCode(array $scopes, ConsumerInterface $consumer, $redirect_url)
+	public function createAuthCode(array $scopes, ConsumerInterface $consumer, $redirect_url, UserInterface $user)
 	{
 		$code = $this->base64url_encode($this->random_string(16));
 
@@ -29,6 +30,7 @@ class OAuthService
 		$entity->setRedirectUrl($redirect_url);
 		$entity->setConsumer($consumer);
 		$entity->setScopes($scopes);
+		$entity->setUser($user);
 		$dt = new \DateTime();
 		$entity->setValidTill($dt->getTimestamp() + $oauth["code_lifetime"]);
 

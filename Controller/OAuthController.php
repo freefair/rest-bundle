@@ -77,7 +77,7 @@ class OAuthController extends RestController
 		/** @var ConsumerInterface $client */
 		$client =$this->getDoctrine()->getRepository($client_entity)->findOneBy(array('client_id' => $model->client_id));
 
-		$authCodeInterface = $this->getService()->createAuthCode(explode(" ", $model->scope), $client, $model->redirect_uri);
+		$authCodeInterface = $this->getService()->createAuthCode(explode(" ", $model->scope), $client, $model->redirect_uri, $user);
 		$authTokenInterface = $this->getService()->createAuthTokenFromCode($authCodeInterface);
 
 		return $this->createAccessTokenResponse($authTokenInterface->getAuthToken(), $authTokenInterface->getValidTill());

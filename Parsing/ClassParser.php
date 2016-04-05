@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ClassParser
 {
-	private static $specialTypes = array("DateTime", "double", "integer", "boolean");
+	private static $specialTypes = array("DateTime", "double", "integer", "boolean", "string");
 
 	/**
 	 * @var ContainerInterface
