@@ -9,6 +9,8 @@
 namespace freefair\RestBundle\Entity;
 
 
+use Symfony\Component\Security\Core\User\UserInterface;
+
 interface AuthTokenInterface
 {
 	public function setAuthToken($token);
@@ -22,4 +24,7 @@ interface AuthTokenInterface
 
 	public function getValidTill();
 	public function setValidTill($timestamp);
+
+	public function getUser();
+	public function setUser(UserInterface $user);
 }

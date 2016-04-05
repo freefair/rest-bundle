@@ -63,6 +63,7 @@ class AuthenticationListener
 				$session = new Session(new MockArraySessionStorage());
 				$session->set("token", $authToken->getAuthToken());
 				$session->set("consumer", $authToken->getConsumer());
+				$session->set("user", $authToken->getUser());
 				$event->getRequest()->setSession($session);
 			}
 			else if ($type == "static"){

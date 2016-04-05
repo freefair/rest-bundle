@@ -51,6 +51,7 @@ class OAuthService
 		$entity->setAuthToken($code);
 		$entity->setScopes($authCode->getScopes());
 		$entity->setConsumer($authCode->getConsumer());
+		$entity->setUser($authCode->getUser());
 		$dt = new \DateTime();
 		$entity->setValidTill($dt->getTimestamp() + $oauth["token_lifetime"]);
 
