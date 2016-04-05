@@ -46,6 +46,7 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode("token_url")->defaultValue("/oauth/token")->end()
                                 ->scalarNode("grant_controller")->defaultNull()->end()
                                 ->scalarNode("token_controller")->defaultValue("RestBundle:OAuth:token")->end()
+                                ->scalarNode("admin_scope_prefix")->defaultValue("admin")->end()
                                 ->arrayNode("persistence")
                                     ->children()
                                         ->scalarNode("auth_code_entity")->end()

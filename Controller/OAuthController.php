@@ -60,6 +60,8 @@ class OAuthController extends RestController
 		$validateClient = $this->getService()->validateClient($model->client_id, $model->client_secret, $model->redirect_uri);
 		if(!$validateClient) return $this->invalidClient();
 
+		$scopes = explode(" ", $model->scope);
+
 		$persistence = $this->getParameter("rest.config")["authentication"]["oauth"]["persistence"];
 		$user_entity = $persistence["user_entity"];
 		$client_entity = $persistence["consumer_entity"];
@@ -67,6 +69,13 @@ class OAuthController extends RestController
 		/** @var UserInterface $user */
 		$user = $this->getDoctrine()->getRepository($user_entity)->findOneBy(array("username" => $model->username));
 		if($user == null) return $this->invalidClient();
+
+		$adm_pref = $this->getParameter("rest.config")["authentication"]["oauth"]["admin_scope_prefix"];
+		if(strpos($model->scope, $adm_pref) === 0 || strpos($model->scope, ' ' . $adm_pref) >= 0)
+		{
+			if(!in_array($adm_pref, $user->getRoles()))
+				return $this->invalidClient();
+		}
 
 		$encoder_service = $this->get('security.encoder_factory');
 		$encoder = $encoder_service->getEncoder($user_entity);
@@ -77,7 +86,7 @@ class OAuthController extends RestController
 		/** @var ConsumerInterface $client */
 		$client =$this->getDoctrine()->getRepository($client_entity)->findOneBy(array('client_id' => $model->client_id));
 
-		$authCodeInterface = $this->getService()->createAuthCode(explode(" ", $model->scope), $client, $model->redirect_uri, $user);
+		$authCodeInterface = $this->getService()->createAuthCode($scopes, $client, $model->redirect_uri, $user);
 		$authTokenInterface = $this->getService()->createAuthTokenFromCode($authCodeInterface);
 
 		return $this->createAccessTokenResponse($authTokenInterface->getAuthToken(), $authTokenInterface->getValidTill());
