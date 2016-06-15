@@ -161,13 +161,15 @@ class ClassParser
 
 	private function buildArrayFromSpecialType($getValue, $className)
 	{
-		if ($className == "DateTime") {
-			/** @var \DateTime $dt */
-			$dt = $getValue;
-			$date_format = $this->container->getParameter("rest.config")["date_format"];
-			if ($date_format != "php")
-				$dt = $dt->format($date_format);
-			return $dt;
+		if($getValue != null) {
+			if ($className == "DateTime") {
+				/** @var \DateTime $dt */
+				$dt = $getValue;
+				$date_format = $this->container->getParameter("rest.config")["date_format"];
+				if ($date_format != "php")
+					$dt = $dt->format($date_format);
+				return $dt;
+			}
 		}
 		return $getValue;
 	}
