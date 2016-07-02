@@ -37,6 +37,16 @@ abstract class RestController extends \Symfony\Bundle\FrameworkBundle\Controller
 		$session = $this->get("request_stack");
 		return $session->getCurrentRequest()->getSession()->get("consumer");
 	}
+	
+	/**
+	 * @return bool
+	 */
+	protected function isAdmin() {
+		$adminPrefix = $this->getParameter("rest.config")["authentication"]["oauth"]["admin_scope_prefix"];
+		return count(array_filter($this->getScopes(), function($i) use ($adminPrefix) {
+			return strpos($i, $adminPrefix) !== false;
+		})) > 0;
+	}
 
 	/**
 	 * @return string[]
