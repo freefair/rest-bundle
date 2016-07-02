@@ -61,7 +61,7 @@ class AuthenticationListener
 				if ($authToken == null) $this->unauth();
 
 				$session = new Session(new MockArraySessionStorage());
-				$session->set("token", $authToken->getAuthToken());
+				$session->set("token", $authToken);
 				$session->set("consumer", $authToken->getConsumer());
 				$session->set("user", $authToken->getUser());
 				$event->getRequest()->setSession($session);
