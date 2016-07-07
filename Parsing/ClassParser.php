@@ -85,7 +85,7 @@ class ClassParser
 	private function buildArray($obj)
 	{
 		$result = array();
-		if($obj != null) {
+		if($obj !== null) {
 			if (is_array($obj) || $obj instanceof Countable) {
 				foreach ($obj as $key => $value) {
 					$result[$key] = $this->buildArray($value);
@@ -121,7 +121,7 @@ class ClassParser
 	private function buildObject($parse, ReflectionClass $class)
 	{
 		$result = $class->newInstance();
-		if ($parse != null) {
+		if ($parse !== null) {
 			$reflectionProperties = $class->getProperties();
 			foreach ($reflectionProperties as $property) {
 				$serializeAnnotation = $this->reader->getPropertyAnnotation($property, Serialize::class);
