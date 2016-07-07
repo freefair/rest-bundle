@@ -32,7 +32,7 @@ class ResponseListener
 		$response = $event->getResponse();
 		if(in_array($response->headers->get("content-type"), $arr)) return;
 		$error = $response->isServerError() || $event->getResponse()->isClientError();
-		if($error) {
+		if($error && self::$exception != null) {
 			$result = array();
 			$result["status"] = $response->getStatusCode();
 			if(self::$exception != null) {
