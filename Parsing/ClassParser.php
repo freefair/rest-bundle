@@ -59,8 +59,21 @@ class ClassParser
 		$result = $formatter->parse($content);
 
 		if (!empty($class)) {
-			$class = new \ReflectionClass($class);
-			$result = $this->buildObject($result, $class);
+			if(strpos($class, "[]") !== false) {
+				if(is_array($result)){
+					$class = substr($class, 0, -2);
+					$class = new \ReflectionClass($class);
+					$array = array();
+					foreach ($result as $value) {
+						$array[] = $this->buildObject($value, $class);
+					}
+					$result = $array;
+				}
+			}
+			else {
+				$class = new \ReflectionClass($class);
+				$result = $this->buildObject($result, $class);
+			}
 		}
 		return $result;
 	}
