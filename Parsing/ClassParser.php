@@ -4,6 +4,7 @@ namespace freefair\RestBundle\Parsing;
 
 use Countable;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Collections\ArrayCollection;
 use freefair\RestBundle\Annotations\Serialize;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -152,12 +153,13 @@ class ClassParser
 					if (strpos($className, "[]") !== false) {
 						$className = substr($className, 0, -2);
 						$array = $parse[$name];
-						$val = array();
+						/** @var ArrayCollection $val */
+						$val = new ArrayCollection();
 						foreach ($array as $value) {
 							if (in_array($className, self::$specialTypes))
-								$val[] = $this->buildSpecialObject($value, $className);
+								$val->add($this->buildSpecialObject($value, $className));
 							else
-								$val[] = $this->buildObject($value, new ReflectionClass($className));
+								$val->add($this->buildObject($value, new ReflectionClass($className)));
 						}
 					} else {
 						if (in_array($className, self::$specialTypes))
